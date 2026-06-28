@@ -1,0 +1,67 @@
+{% extends "tickets/base.html" %}
+{% block title %}Список заявок{% endblock %}
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h1>Заявки</h1>
+    <a href="{% url 'tickets:create' %}" class="btn btn-primary">+ Новая заявка</a>
+</div>
+
+<form method="get" class="filters card">
+    <div class="fld">
+        <label>Поиск</label>
+        <input class="inp" type="text" name="q" value="{{ cur_query }}" placeholder="по заголовку">
+    </div>
+    <div class="fld">
+        <label>Статус</label>
+        <select class="inp" name="status">
+            <option value="">Все</option>
+            {% for code, label in status_choices %}
+                <option value="{{ code }}" {% if cur_status == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="fld">
+        <label>Приоритет</label>
+        <select class="inp" name="priority">
+            <option value="">Любой</option>
+            {% for code, label in priority_choices %}
+                <option value="{{ code }}" {% if cur_priority == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="fld">
+        <label>Сервис</label>
+        <input class="inp" type="text" name="service" value="{{ cur_service }}">
+    </div>
+    <button type="submit" class="btn btn-primary">Применить</button>
+    <a href="{% url 'tickets:list' %}" class="btn btn-ghost">Сброс</a>
+</form>
+
+<div class="card" style="padding:0;">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th><th>Заголовок</th>
+                {% if is_moderator %}<th>Владелец</th>{% endif %}
+                <th>Сервис</th><th>Статус</th><th>Приоритет</th><th>Создана</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.id }}</td>
+                <td><a class="link" href="{% url 'tickets:detail' ticket.pk %}">{{ ticket.title }}</a></td>
+                {% if is_moderator %}<td>{{ ticket.owner.username }}</td>{% endif %}
+                <td>{{ ticket.service }}</td>
+                <td><span class="badge b-{{ ticket.status }}">{{ ticket.get_status_display }}</span></td>
+                <td><span class="badge b-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span></td>
+                <td>{{ ticket.created_at|date:"d.m.Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:#6b778c;">Заявок не найдено</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
