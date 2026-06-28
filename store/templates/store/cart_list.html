@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список корзин</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1c1e21;
+            line-height: 1.5;
+            padding: 30px 16px;
+        }
+        .wrap { max-width: 1000px; margin: 0 auto; }
+        h1 { font-size: 1.8rem; margin-bottom: 4px; color: #1a1a2e; }
+        .subtitle { color: #65676b; margin-bottom: 28px; font-size: .95rem; }
+
+        .cart-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08);
+            border-left: 5px solid #4267B2;
+            transition: box-shadow .2s, transform .2s;
+        }
+        .cart-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.12); transform: translateY(-2px); }
+
+        .cart-head {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+        }
+        .cart-id { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; }
+        .cart-customer { color: #4267B2; font-weight: 600; }
+
+        .badge {
+            display: inline-block; padding: .3em .8em;
+            border-radius: 100px; font-size: .78rem; font-weight: 700;
+        }
+        .badge-new       { background: #e7f3ff; color: #1877f2; }
+        .badge-paid      { background: #e3f7e8; color: #1a7a35; }
+        .badge-cancelled { background: #ffeaea; color: #d32f2f; }
+
+        .cart-meta {
+            display: flex; flex-wrap: wrap; gap: 24px;
+            padding: 12px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee;
+            margin-bottom: 14px;
+        }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #999; }
+        .meta-value { font-weight: 700; font-size: 1rem; color: #1a1a2e; }
+
+        .products-title { font-size: .8rem; text-transform: uppercase; color: #999; margin-bottom: 8px; letter-spacing: .04em; }
+        .product-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .product-tag {
+            background: #f0f2f5; border-radius: 8px;
+            padding: 6px 12px; font-size: .85rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .product-price { color: #4267B2; font-weight: 600; font-size: .8rem; }
+        .no-products { color: #aaa; font-style: italic; font-size: .9rem; }
+
+        .empty {
+            background: #fff; border-radius: 14px; padding: 60px 20px;
+            text-align: center; color: #999;
+        }
+        .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <h1>🛒 Список корзин</h1>
+    <p class="subtitle">Всего корзин: {{ total_carts }}</p>
+
+    {% for cart in carts %}
+    <div class="cart-card">
+
+        <div class="cart-head">
+            <div>
+                <span class="cart-id">Корзина #{{ cart.id }}</span>
+                &nbsp;·&nbsp;
+                <span class="cart-customer">{{ cart.customer.name }}</span>
+            </div>
+
+            {% if cart.status == 'new' %}
+                <span class="badge badge-new">Новая</span>
+            {% elif cart.status == 'paid' %}
+                <span class="badge badge-paid">Оплачена</span>
+            {% else %}
+                <span class="badge badge-cancelled">Отменена</span>
+            {% endif %}
+        </div>
+
+        <div class="cart-meta">
+            <div class="meta-item">
+                <span class="meta-label">Email</span>
+                <span class="meta-value">{{ cart.customer.email }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Дата создания</span>
+                <span class="meta-value">{{ cart.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Товаров</span>
+                <span class="meta-value">{{ cart.total_items }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Сумма</span>
+                <span class="meta-value">{{ cart.total_price }} ₽</span>
+            </div>
+        </div>
+
+        <div class="products-title">Товары в корзине</div>
+        <div class="product-list">
+            {% for product in cart.products.all %}
+                <span class="product-tag">
+                    {{ product.name }}
+                    <span class="product-price">{{ product.price }} ₽</span>
+                </span>
+            {% empty %}
+                <span class="no-products">Корзина пуста</span>
+            {% endfor %}
+        </div>
+
+    </div>
+    {% empty %}
+    <div class="empty">
+        <div class="empty-icon">🛒</div>
+        <p>Корзин пока нет. Создайте их в админ-панели.</p>
+    </div>
+    {% endfor %}
+
+</div>
+</body>
+</html>
