@@ -1,0 +1,7 @@
+/* Подсветка неактивных корзин в списке админки */
+tr.cart-inactive {
+    background: #fff5f5 !important;
+}
+tr.cart-inactive td {
+    opacity: 0.75;
+}
