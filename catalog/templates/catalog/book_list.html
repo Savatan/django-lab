@@ -1,0 +1,97 @@
+{% extends "catalog/base.html" %}
+{% load book_tags %}
+
+{% block title %}Каталог книг{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <div class="hero-eyebrow">{% site_name %} · Библиотека</div>
+    <h1 class="hero-title">Читайте лучшее.</h1>
+    <p class="hero-subtitle">Тысячи книг на любой вкус — классика, фантастика, детективы и многое другое.</p>
+</div>
+
+{% if books %}
+<div class="container" style="padding-top:56px;">
+
+    {% for book in books %}
+    {% if forloop.first %}
+    <div class="featured">
+        <div class="featured-body">
+            <div class="featured-eyebrow">Выбор редакции</div>
+            <div class="featured-title">{{ book.title }}</div>
+            <div class="featured-author">{{ book.author.full_name }}</div>
+            <div class="featured-desc">{{ book.description|short_description:140 }}</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a class="btn btn-primary" href="{% url 'catalog:book_detail' book.pk %}">Подробнее</a>
+                <span style="font-size:.88rem;font-weight:600;color:#1d1d1f;">{{ book.price|rubles }}</span>
+            </div>
+        </div>
+        <div class="featured-cover-side" style="background:{{ book.cover_color }};">📖</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <div class="section-header">
+        <div class="section-title">
+            {% if active_genre %}{{ active_genre.name }}{% else %}Все книги{% endif %}
+            <span style="font-size:1rem;font-weight:400;color:var(--text-tertiary);margin-left:8px;">
+                {# Встроенный фильтр length: кол-во книг #}
+                {{ books|length }}
+            </span>
+        </div>
+    </div>
+
+    <div class="chips">
+        <a href="{% url 'catalog:book_list' %}" class="chip {% if not active_genre %}active{% endif %}">Все</a>
+        {# Встроенный тег for: перебор жанров #}
+        {% for genre in genres %}
+            <a href="{% url 'catalog:book_list' %}?genre={{ genre.slug }}"
+               class="chip {% if active_genre.slug == genre.slug %}active{% endif %}">
+                {{ genre.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="sort-row">
+        <span style="font-size:.8rem;color:var(--text-tertiary);padding:6px 4px;">Сортировка:</span>
+        <a href="?{% if active_genre %}genre={{ active_genre.slug }}&{% endif %}sort=rating" class="sort-btn {% if current_sort == 'rating' %}active{% endif %}">Рейтинг</a>
+        <a href="?{% if active_genre %}genre={{ active_genre.slug }}&{% endif %}sort=price" class="sort-btn {% if current_sort == 'price' %}active{% endif %}">Дешевле</a>
+        <a href="?{% if active_genre %}genre={{ active_genre.slug }}&{% endif %}sort=-price" class="sort-btn {% if current_sort == '-price' %}active{% endif %}">Дороже</a>
+        <a href="?{% if active_genre %}genre={{ active_genre.slug }}&{% endif %}sort=year" class="sort-btn {% if current_sort == 'year' %}active{% endif %}">Новее</a>
+    </div>
+
+    <div class="book-grid">
+        {% for book in books %}
+        <a class="book-card" href="{% url 'catalog:book_detail' book.pk %}" style="text-decoration:none;">
+            <div class="book-card-cover-wrap" style="background:{{ book.cover_color }};">
+                <div class="book-card-cover">📖</div>
+                <div class="book-card-badge">
+                    {# КАСТОМНЫЙ FILTER: status_badge — HTML-бейдж #}
+                    {{ book.status|status_badge }}
+                </div>
+            </div>
+            <div class="book-card-stars">
+                {# КАСТОМНЫЙ SIMPLE_TAG: star_rating #}
+                {% star_rating book.rating %}
+            </div>
+            {# Встроенный фильтр truncatechars #}
+            <div class="book-card-title">{{ book.title|truncatechars:36 }}</div>
+            <div class="book-card-author">{{ book.author.full_name }}</div>
+            {# КАСТОМНЫЙ FILTER: rubles #}
+            <div class="book-card-price">{{ book.price|rubles }}</div>
+        </a>
+        {% empty %}
+        <div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-state-icon">📭</div>
+            <div class="empty-state-title">Книги не найдены</div>
+            <p>Попробуйте другой жанр или сбросьте фильтры.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="padding-bottom:64px;"></div>
+
+{% endblock %}
