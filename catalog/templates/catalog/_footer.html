@@ -1,0 +1,8 @@
+{% load book_tags %}
+<footer class="footer">
+    <div style="margin-bottom:10px;">
+        <a href="{% url 'catalog:book_list' %}">Каталог</a>
+        <a href="{% url 'catalog:author_list' %}">Авторы</a>
+    </div>
+    <div>Copyright &copy; {% now "Y" %} {% site_name %}. Все права защищены.</div>
+</footer>

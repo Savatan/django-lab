@@ -1,0 +1,126 @@
+{% extends "catalog/base.html" %}
+{% load book_tags %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block extra_css %}
+@media (max-width: 700px) {
+    .detail-hero-inner { grid-template-columns: 1fr !important; }
+    .detail-cover-wrap { max-width: 180px; margin: 0 auto; }
+    .detail-title { font-size: 1.7rem !important; }
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="detail-hero">
+    <div class="detail-hero-inner">
+
+        <div class="detail-cover-wrap" style="background:{{ book.cover_color }};">📖</div>
+
+        <div>
+            <div class="detail-eyebrow">
+                {# Встроенный тег for: жанры через запятую #}
+                {% for genre in book.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </div>
+            <h1 class="detail-title">{{ book.title }}</h1>
+            <div class="detail-author">{{ book.author.full_name }}</div>
+
+            <div class="detail-meta-row">
+                {# КАСТОМНЫЙ SIMPLE_TAG: star_rating #}
+                {% star_rating book.rating %}
+                <span style="color:var(--text-tertiary);font-size:.85rem;">({{ reviews_count }} отзывов)</span>
+                {# КАСТОМНЫЙ FILTER: status_badge #}
+                {{ book.status|status_badge }}
+            </div>
+
+            <div class="detail-price-tag">
+                {# КАСТОМНЫЙ FILTER: rubles #}
+                {{ book.price|rubles }}
+            </div>
+
+            <div class="detail-actions" style="margin-top:18px;">
+                {% if book.is_available %}
+                <a class="btn btn-primary" href="#">Купить</a>
+                {% endif %}
+                <a class="btn btn-outline" href="{% url 'catalog:book_list' %}">← В каталог</a>
+            </div>
+
+            <div class="detail-facts">
+                <div class="detail-fact-item">
+                    <span class="detail-fact-label">Год</span>
+                    <span class="detail-fact-value">{{ book.published_year }}</span>
+                </div>
+                <div class="detail-fact-item">
+                    <span class="detail-fact-label">Страниц</span>
+                    <span class="detail-fact-value">{{ book.pages }}</span>
+                </div>
+                <div class="detail-fact-item">
+                    <span class="detail-fact-label">Рейтинг</span>
+                    {# Встроенный фильтр floatformat #}
+                    <span class="detail-fact-value">{{ book.rating|floatformat:1 }} / 5</span>
+                </div>
+                <div class="detail-fact-item">
+                    <span class="detail-fact-label">Издан</span>
+                    {# КАСТОМНЫЙ SIMPLE_TAG: book_age #}
+                    <span class="detail-fact-value">{% book_age book.published_year %}</span>
+                </div>
+                <div class="detail-fact-item">
+                    <span class="detail-fact-label">Добавлена</span>
+                    {# Встроенный фильтр date #}
+                    <span class="detail-fact-value">{{ book.created_at|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="padding-top:40px;padding-bottom:0;">
+    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:14px;">Об этой книге</h2>
+    <div style="font-size:.95rem;color:var(--text-secondary);line-height:1.75;max-width:680px;">
+        {# Встроенный фильтр linebreaks #}
+        {{ book.description|linebreaks }}
+    </div>
+
+    <div style="margin-top:28px;">
+        <div style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:12px;">Рейтинг читателей</div>
+        <div class="rating-bar-wrap" style="max-width:340px;">
+            {# Встроенный тег widthratio: заполнение шкалы #}
+            <div class="rating-bar-track">
+                <div class="rating-bar-fill" style="width:{% widthratio book.rating 5 100 %}%;"></div>
+            </div>
+            <span class="rating-bar-label">{{ book.rating|floatformat:1 }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="reviews-section container">
+    {# Встроенный тег with: локальная переменная #}
+    {% with count=reviews_count %}
+    <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:20px;">
+        Отзывы
+        <span style="font-size:.9rem;font-weight:400;color:var(--text-tertiary);">({{ count }})</span>
+    </h2>
+    {% endwith %}
+
+    {% for review in reviews %}
+    <div class="review-card">
+        <div class="review-top">
+            <span class="reviewer">{{ review.reviewer_name }}</span>
+            {# Встроенный фильтр date #}
+            <span class="review-date">{{ review.created_at|date:"d F Y" }}</span>
+        </div>
+        <div class="review-stars">
+            {% for i in "12345" %}{% if forloop.counter <= review.score %}★{% else %}☆{% endif %}{% endfor %}
+        </div>
+        <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.6;">{{ review.text }}</p>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="padding:40px 0;">
+        <div class="empty-state-icon" style="font-size:2.5rem;">💬</div>
+        <div class="empty-state-title">Отзывов пока нет</div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

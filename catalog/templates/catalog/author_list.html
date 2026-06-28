@@ -1,0 +1,43 @@
+{% extends "catalog/base.html" %}
+{% load book_tags %}
+
+{% block title %}Авторы{% endblock %}
+
+{% block content %}
+
+<div class="hero">
+    <div class="hero-eyebrow">{% site_name %}</div>
+    <h1 class="hero-title">Авторы</h1>
+    {# Встроенный фильтр length #}
+    <p class="hero-subtitle">{{ authors|length }} авторов в нашей библиотеке</p>
+</div>
+
+<div class="container section">
+    <div class="author-grid">
+        {% for author in authors %}
+        <div class="author-card">
+            {# Встроенный фильтр slice + upper: инициалы #}
+            <div class="author-avatar">
+                {{ author.last_name|slice:":1"|upper }}{{ author.first_name|slice:":1"|upper }}
+            </div>
+            <div class="author-name">{{ author.full_name }}</div>
+            {% if author.birth_year %}
+            <div style="font-size:.78rem;color:var(--text-tertiary);margin-bottom:4px;">р. {{ author.birth_year }}</div>
+            {% endif %}
+            <div class="author-books">
+                {{ author.books.all|length }} книг
+            </div>
+            {% if author.bio %}
+            <p style="font-size:.78rem;color:var(--text-secondary);margin-top:10px;line-height:1.5;">
+                {# КАСТОМНЫЙ FILTER: short_description #}
+                {{ author.bio|short_description:90 }}
+            </p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p style="color:var(--text-tertiary);">Авторы не найдены.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
