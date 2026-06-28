@@ -1,0 +1,13 @@
+{% extends "tickets/base.html" %}
+{% block title %}Удаление{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px;">
+    <h1>Удалить заявку?</h1>
+    <p style="margin:12px 0;">Заявка #{{ ticket.id }} «{{ ticket.title }}» будет удалена безвозвратно.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, удалить</button>
+        <a href="{% url 'tickets:detail' ticket.pk %}" class="btn btn-ghost">Отмена</a>
+    </form>
+</div>
+{% endblock %}

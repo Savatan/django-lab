@@ -1,0 +1,88 @@
+{% extends "tickets/base.html" %}
+{% block title %}{{ ticket.title }}{% endblock %}
+{% block content %}
+
+<a class="link" href="{% url 'tickets:list' %}">&larr; К списку</a>
+
+<div class="card" style="margin-top:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:16px;">
+        <div>
+            <h1>#{{ ticket.id }} {{ ticket.title }}</h1>
+            <div style="color:#6b778c;font-size:.85rem;">
+                Владелец: {{ ticket.owner.username }} ·
+                Сервис: {{ ticket.service }} ·
+                Создана: {{ ticket.created_at|date:"d.m.Y H:i" }} ·
+                Изменена: {{ ticket.updated_at|date:"d.m.Y H:i" }}
+            </div>
+        </div>
+        <div style="text-align:right;">
+            <span class="badge b-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+            <span class="badge b-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+        </div>
+    </div>
+
+    <p style="margin-top:14px;white-space:pre-wrap;">{{ ticket.description }}</p>
+
+    {% if ticket.attachment %}
+        <p style="margin-top:10px;"><a class="link" href="{{ ticket.attachment.url }}">📎 Вложение</a></p>
+    {% endif %}
+
+    <div style="margin-top:16px;display:flex;gap:8px;">
+        {% if can_edit %}<a class="btn btn-ghost" href="{% url 'tickets:edit' ticket.pk %}">Редактировать</a>{% endif %}
+        {% if can_delete %}
+        <form method="post" action="{% url 'tickets:delete' ticket.pk %}" style="display:inline;"
+              onsubmit="return confirm('Удалить заявку?');">
+            {% csrf_token %}
+            <button class="btn btn-danger">Удалить</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% if can_change_status %}
+<div class="card">
+    <h2>Сменить статус</h2>
+    <form method="post" style="display:flex;gap:10px;align-items:end;">
+        {% csrf_token %}
+        <div style="flex:1;max-width:240px;">{{ status_form.status }}</div>
+        <button type="submit" name="change_status" class="btn btn-primary">Обновить</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Комментарии ({{ comments|length }})</h2>
+    {% for c in comments %}
+        <div style="padding:10px 0;border-bottom:1px solid #ebecf0;">
+            <div style="font-size:.82rem;color:#6b778c;">
+                <strong style="color:#172b4d;">{{ c.author.username }}</strong> · {{ c.created_at|date:"d.m.Y H:i" }}
+            </div>
+            <div style="margin-top:4px;white-space:pre-wrap;">{{ c.text }}</div>
+        </div>
+    {% empty %}
+        <p style="color:#6b778c;">Комментариев пока нет.</p>
+    {% endfor %}
+
+    {% if can_comment %}
+    <form method="post" style="margin-top:14px;">
+        {% csrf_token %}
+        {{ comment_form.text }}
+        <button type="submit" name="add_comment" class="btn btn-primary" style="margin-top:8px;">Отправить</button>
+    </form>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>История изменений</h2>
+    {% for h in history %}
+        <div style="font-size:.84rem;padding:6px 0;border-bottom:1px solid #f4f5f7;">
+            <span style="color:#6b778c;">{{ h.changed_at|date:"d.m.Y H:i" }}</span> ·
+            {{ h.user.username|default:"система" }} ·
+            <strong>{{ h.field }}</strong>
+            {% if h.old_value %}: {{ h.old_value }} &rarr; {{ h.new_value }}{% else %} {{ h.new_value }}{% endif %}
+        </div>
+    {% empty %}
+        <p style="color:#6b778c;">Изменений нет.</p>
+    {% endfor %}
+</div>
+{% endblock %}

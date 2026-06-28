@@ -1,0 +1,32 @@
+{% extends "tickets/base.html" %}
+{% block title %}Панель модератора{% endblock %}
+{% block content %}
+<h1>Панель модератора</h1>
+<div style="display:flex;gap:14px;margin:14px 0;">
+    <div class="card" style="flex:1;text-align:center;margin:0;">
+        <div style="font-size:2rem;font-weight:800;">{{ total }}</div>
+        <div style="color:#6b778c;font-size:.82rem;">Всего заявок</div>
+    </div>
+    <div class="card" style="flex:1;text-align:center;margin:0;">
+        <div style="font-size:2rem;font-weight:800;color:#de350b;">{{ high_priority }}</div>
+        <div style="color:#6b778c;font-size:.82rem;">Высокий приоритет</div>
+    </div>
+</div>
+
+{% for label, items in grouped.items %}
+<div class="card">
+    <h2>{{ label }} ({{ items|length }})</h2>
+    {% for ticket in items %}
+        <div style="padding:8px 0;border-bottom:1px solid #f4f5f7;display:flex;justify-content:space-between;">
+            <a class="link" href="{% url 'tickets:detail' ticket.pk %}">#{{ ticket.id }} {{ ticket.title }}</a>
+            <span style="color:#6b778c;font-size:.82rem;">
+                {{ ticket.owner.username }} ·
+                <span class="badge b-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+            </span>
+        </div>
+    {% empty %}
+        <p style="color:#6b778c;font-size:.85rem;">Нет заявок.</p>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}

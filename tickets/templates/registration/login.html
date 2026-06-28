@@ -1,0 +1,29 @@
+{% extends "tickets/base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div style="max-width:360px;margin:40px auto;">
+    <div class="card">
+        <h1>Вход в систему</h1>
+        {% if form.errors %}
+            <div class="msg" style="background:#ffebe6;color:#de350b;">
+                Неверное имя пользователя или пароль.
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div style="margin-bottom:12px;">
+                <label style="font-size:.8rem;color:#6b778c;">Имя пользователя</label>
+                {{ form.username }}
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:.8rem;color:#6b778c;">Пароль</label>
+                {{ form.password }}
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Войти</button>
+        </form>
+    </div>
+    <p style="text-align:center;font-size:.82rem;color:#6b778c;">
+        Тестовые входы создаются скриптом seed_data.py
+    </p>
+</div>
+{% endblock %}
